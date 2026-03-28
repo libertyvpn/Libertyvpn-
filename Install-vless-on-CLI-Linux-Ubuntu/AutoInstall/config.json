@@ -1,0 +1,45 @@
+{
+    "inbounds": [
+        {
+            "address": [
+                "172.18.0.1/30"
+            ],
+            "auto_route": true,
+            "mtu": 1500,
+            "stack": "mixed",
+            "strict_route": true,
+            "tag": "tun-in",
+            "type": "tun"
+        }
+    ],
+    "log": {
+        "level": "info",
+        "timestamp": true
+    },
+    "outbounds": [
+        {
+            "server": "127.0.0.1",
+            "server_port": 1080,
+            "tag": "proxy",
+            "type": "socks",
+            "udp_fragment": true
+        },
+        {
+            "type": "direct",
+            "tag": "direct"
+        }
+    ],
+    "route": {
+        "auto_detect_interface": true,
+        "final": "proxy",
+        "rules": [
+            {
+                "outbound": "direct",
+                "process_name": [
+                    "xray",
+                    "sing-box"
+                ]
+            }
+        ]
+    }
+}
