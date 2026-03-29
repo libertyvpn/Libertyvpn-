@@ -77,8 +77,8 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/xray run -config $XRAY_CONFIG
-Restart=always
+ExecStart=/usr/local/bin/xray -config $XRAY_CONFIG
+Restart=on-failure
 RestartSec=3
 
 [Install]
@@ -98,7 +98,7 @@ StartLimitBurst=5
 [Service]
 Type=simple
 ExecStart=/usr/bin/sing-box run -c $SINGBOX_CONFIG
-Restart=always
+Restart=on-failure
 RestartSec=3
 
 [Install]
