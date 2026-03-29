@@ -126,10 +126,6 @@ systemctl restart xray-custom
 sleep 2
 systemctl restart singbox-custom
 
-echo "=== Проверка IP ==="
-curl https://api.ipify.org
-echo ""
-
 echo "=== Установка vpn-switch ==="
 
 cat <<'EOF' > /usr/local/bin/vpn-switch
@@ -172,9 +168,9 @@ ln -sf $CONFIG_DIR/$selected $CONFIG_DIR/active.json
 echo ""
 echo "Перезапуск VPN..."
 
-systemctl restart xray-vpn
+systemctl restart xray-custom
 sleep 2
-systemctl restart singbox-vpn
+systemctl restart singbox-custom
 
 echo ""
 echo "Новый IP:"
@@ -183,5 +179,9 @@ echo ""
 EOF
 
 chmod +x /usr/local/bin/vpn-switch
+
+echo "=== Проверка IP ==="
+curl https://api.ipify.org
+echo ""
 
 echo "=== Готово ==="
