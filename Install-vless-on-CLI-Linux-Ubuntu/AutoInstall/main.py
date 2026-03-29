@@ -37,22 +37,86 @@ def parse_vless(link):
 
 def build_config(v):
     return {
+        "dns": {
+            "hosts": {
+                "domain:googleapis.cn": "googleapis.com"
+            },
+            "queryStrategy": "UseIPv4",
+            "servers": [
+                "1.1.1.1",
+                {
+                    "address": "1.1.1.1",
+                    "domains": [
+                    ],
+                    "port": 53
+                },
+                {
+                    "address": "8.8.8.8",
+                    "domains": [
+                    ],
+                    "port": 53
+                }
+            ]
+        },
         "log": {
             "loglevel": "warning"
         },
         "inbounds": [
             {
                 "listen": "127.0.0.1",
-                "port": 1080,
+                "port": 10808,
                 "protocol": "socks",
                 "settings": {
-                    "udp": True
-                }
+                    "auth": "noauth",
+                    "udp": True,
+                    "userLevel": 8
+                },
+                "sniffing": {
+                    "destOverride": [
+                        "http",
+                        "tls",
+                        "quic"
+                    ],
+                    "enabled": True
+                },
+                "tag": "socks"
+            },
+            {
+                "listen": "127.0.0.1",
+                "port": 10809,
+                "protocol": "http",
+                "settings": {
+                    "userLevel": 8
+                },
+                "sniffing": {
+                    "destOverride": [
+                        "http",
+                        "tls",
+                        "quic"
+                    ],
+                    "enabled": True
+                },
+                "tag": "http"
+            },
+            {
+                "listen": "127.0.0.1",
+                "port": 11111,
+                "protocol": "dokodemo-door",
+                "settings": {
+                    "address": "127.0.0.1"
+                },
+                "tag": "metrics_in"
             }
         ],
         "remarks": v["remark"],
         "outbounds": [
             {
+                "mux": {
+                    "concurrency": -1,
+                    "enabled": False,
+                    "xudpConcurrency": 8,
+                    "xudpProxyUDP443": ""
+                },
                 "protocol": "vless",
                 "settings": {
                     "vnext": [
@@ -63,7 +127,8 @@ def build_config(v):
                                 {
                                     "id": v["uuid"],
                                     "encryption": "none",
-                                    "flow": v["flow"]
+                                    "flow": v["flow"],
+                                    "security": "auto"
                                 }
                             ]
                         }
@@ -81,7 +146,39 @@ def build_config(v):
                     }
                 }
             }
-        ]
+        ],
+        "routing": {
+            "domainStrategy": "IPIfNonMatch",
+            "rules": [
+                {
+                    "inboundTag": [
+                        "metrics_in"
+                    ],
+                    "outboundTag": "metrics_out"
+                },
+                {
+                    "inboundTag": [
+                        "socks"
+                    ],
+                    "outboundTag": "proxy",
+                    "port": "53"
+                },
+                {
+                    "ip": [
+                        "1.1.1.1"
+                    ],
+                    "outboundTag": "proxy",
+                    "port": "53"
+                },
+                {
+                    "ip": [
+                        "8.8.8.8"
+                    ],
+                    "outboundTag": "direct",
+                    "port": "53"
+                }
+            ]
+        }
     }
 
 
@@ -94,10 +191,12 @@ def main():
     if not args.url:
         print("Укажите --url")
         sys.exit(1)
-    else:
-        html_text = fetch_url(args.url)
 
-    links = extract_vless_from_html(html_text)
+    if args.url.startswith("http://") or args.url.startswith("https://"):
+        links = extract_vless_from_html(fetch_url(args.url))
+    
+    if args.url.startswith("vless://"):
+        links = [args.url]
 
     if not links:
         print("VLESS ссылки не найдены")

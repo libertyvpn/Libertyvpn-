@@ -4,7 +4,7 @@ set -e
 
 echo ""
 
-read -p "Введите адрес подписки: " SUB_URL
+read -p "Введите ссылку: " SUB_URL
 
 if [[ -z "$SUB_URL" ]]; then
     echo "Вы не ввели адрес подписки. Выход."

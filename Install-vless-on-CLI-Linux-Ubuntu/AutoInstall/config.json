@@ -1,44 +1,68 @@
 {
-    "inbounds": [
-        {
-            "address": [
-                "172.18.0.1/30"
-            ],
-            "auto_route": true,
-            "mtu": 1500,
-            "stack": "mixed",
-            "strict_route": true,
-            "tag": "tun-in",
-            "type": "tun"
-        }
-    ],
     "log": {
         "level": "info",
         "timestamp": true
     },
+    "dns": {
+        "strategy": "ipv4_only",
+        "servers": [
+            {
+                "type": "udp",
+                "server": "1.1.1.1",
+                "tag": "cloudflare",
+                "detour": "proxy"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "type": "tun",
+            "tag": "tun-in",
+            "address": ["172.18.0.1/30"],
+            "mtu": 1500,
+            "auto_route": true,
+            "strict_route": true,
+            "stack": "mixed"
+        }
+    ],
     "outbounds": [
         {
+            "type": "socks",
+            "tag": "proxy",
             "server": "127.0.0.1",
             "server_port": 1080,
-            "tag": "proxy",
-            "type": "socks",
-            "udp_fragment": true
+            "udp_fragment": true,
+            "domain_resolver": {
+                "server": "cloudflare",
+                "strategy": "prefer_ipv4"
+            }
         },
         {
             "type": "direct",
-            "tag": "direct"
+            "tag": "direct",
+            "domain_resolver": {
+                "server": "cloudflare",
+                "strategy": "prefer_ipv4"
+            }
         }
     ],
     "route": {
-        "auto_detect_interface": true,
         "final": "proxy",
+        "auto_detect_interface": true,
         "rules": [
             {
-                "outbound": "direct",
                 "process_name": [
                     "xray",
                     "sing-box"
-                ]
+                ],
+                "outbound": "direct"
+            },
+            {
+                "action": "sniff"
+            },
+            {
+                "protocol": "dns",
+                "action": "hijack-dns"
             }
         ]
     }
