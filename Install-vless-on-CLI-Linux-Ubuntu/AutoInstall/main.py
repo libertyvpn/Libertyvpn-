@@ -2,7 +2,7 @@ import sys
 import argparse
 import urllib.request
 import base64
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import unquote, urlparse, parse_qs
 import json
 
 
@@ -31,7 +31,8 @@ def parse_vless(link):
         "sni": params.get("sni", [""])[0],
         "fp": params.get("fp", ["chrome"])[0],
         "pbk": params.get("pbk", [""])[0],
-        "sid": params.get("sid", [""])[0]
+        "sid": params.get("sid", [""])[0],
+        "remark": unquote(parsed.fragment) if parsed.fragment else ""
     }
 
 def build_config(v):
@@ -49,6 +50,7 @@ def build_config(v):
                 }
             }
         ],
+        "remarks": v["remark"],
         "outbounds": [
             {
                 "protocol": "vless",

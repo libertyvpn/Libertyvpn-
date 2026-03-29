@@ -45,7 +45,7 @@ echo ""
 
 i=1
 for cfg in "${configs[@]}"; do
-    country=$(jq -r '.outbounds[0].settings.vnext[0].address' $cfg)
+    country=$(jq -r '.remarks' $cfg)
     echo "$i) $country"
     ((i++))
 done
@@ -139,7 +139,7 @@ echo ""
 
 i=1
 for cfg in "${configs[@]}"; do
-    server=$(jq -r '.outbounds[0].settings.vnext[0].address' $cfg)
+    server=$(jq -r '.remarks' $cfg)
     echo "$i) $server"
     ((i++))
 done
