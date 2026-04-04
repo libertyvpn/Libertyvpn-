@@ -27,6 +27,7 @@ bash -c "$(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-releas
 echo "=== Установка sing-box ==="
 wget -O /tmp/sing-box.deb https://github.com/SagerNet/sing-box/releases/download/v1.13.0/sing-box_1.13.0_linux_amd64.deb
 dpkg -i /tmp/sing-box.deb
+rm /tmp/sing-box.deb
 
 echo "=== Создание директории ==="
 mkdir -p $CONFIG_DIR

@@ -5,3 +5,5 @@
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/libertyvpn/Libertyvpn-/main/Install-vless-on-CLI-Linux-Ubuntu/AutoInstall/install.sh)
 ```
+
+Для переключение страны используйте команду `vpn-switch`

@@ -206,7 +206,10 @@ def main():
 
     for link, num in zip(links, range(len(links))):
         with open(f"config{num}.json", "w") as f:
-            json.dump(build_config(parse_vless(link)), f, indent=2)
+            if link.startswith("vless://"):
+                json.dump(build_config(parse_vless(link)), f, indent=2)
+            else:
+                f.write(link)
 
 
 if __name__ == "__main__":
