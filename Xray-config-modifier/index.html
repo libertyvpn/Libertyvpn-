@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Xray Config Modifier</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#1e1e1e;
+    color:white;
+    padding:30px;
+}
+
+textarea{
+    width:100%;
+    height:260px;
+    margin-bottom:15px;
+    padding:10px;
+    background:#2b2b2b;
+    color:white;
+    border:1px solid #444;
+    border-radius:6px;
+    font-family: monospace;
+}
+
+button{
+    padding:12px 25px;
+    font-size:16px;
+    background:#4CAF50;
+    border:none;
+    border-radius:6px;
+    color:white;
+    cursor:pointer;
+}
+
+#status{
+    margin-top:10px;
+}
+</style>
+
+</head>
+<body>
+
+<h2>Xray Config Modifier</h2>
+
+<p>Как использовать:</p>
+<ul>
+    <li>Скопируйте вашу текущую конфигурацию Xray. В Happ нужно нажать на стрелочку справа от локации</li>
+    <li>Вставьте конфигурацию в поле ниже</li>
+    <li>Нажмите "Модифицировать конфиг"</li>
+    <li>Скопируйте результат в буфер обмена</li>
+</ul>
+
+<p>Вставьте конфигурацию:</p>
+<textarea id="input"></textarea>
+
+<button onclick="modifyConfig()">Модифицировать конфиг</button>
+
+<p>Результат:</p>
+<textarea id="output"></textarea>
+
+<div id="status"></div>
+
+<script>
+
+function modifyConfig(){
+
+try{
+
+let config = JSON.parse(document.getElementById("input").value)
+
+
+// удаляем старые DNS routing правила
+config.routing.rules = config.routing.rules.filter(rule => {
+
+if(rule.port === "53") return false
+
+return true
+
+})
+
+
+// новый DNS
+config.dns = {
+hosts:{
+"cloudflare-dns.com":"1.1.1.1",
+"common.dot.dns.yandex.net":"77.88.8.8",
+"dns.google":"8.8.8.8"
+},
+queryStrategy:"UseIPv4",
+servers:[
+"https://dns.google/dns-query",
+{
+address:"https://dns.google/dns-query",
+domains:[]
+},
+{
+address:"https://common.dot.dns.yandex.net/dns-query",
+domains:[
+"geosite:CATEGORY-ECOMMERCE-RU",
+"geosite:CATEGORY-ENTERTAINMENT-RU",
+"geosite:CATEGORY-GOV-RU",
+"geosite:CATEGORY-MEDIA-RU",
+"geosite:CATEGORY-RETAIL-RU",
+"geosite:CATEGORY-RU",
+"geosite:MAILRU",
+"geosite:MAILRU-GROUP",
+"geosite:RUTUBE",
+"geosite:YANDEX",
+"geosite:AVITO",
+"geosite:AVIASALES",
+"geosite:OZON",
+"geosite:VK",
+"geosite:WILDBERRIES"
+]
+}
+]
+}
+
+
+// добавляем новые правила
+config.routing.rules.unshift(
+{
+ip:["8.8.8.8"],
+outboundTag:"proxy",
+port:443
+},
+{
+ip:["77.88.8.8"],
+outboundTag:"direct",
+port:443
+}
+)
+
+config.routing.rules.push(
+{
+domain:[
+"geosite:CATEGORY-ECOMMERCE-RU",
+"geosite:CATEGORY-ENTERTAINMENT-RU",
+"geosite:CATEGORY-GOV-RU",
+"geosite:CATEGORY-MEDIA-RU",
+"geosite:CATEGORY-RETAIL-RU",
+"geosite:CATEGORY-RU",
+"geosite:MAILRU",
+"geosite:MAILRU-GROUP",
+"geosite:RUTUBE",
+"geosite:YANDEX",
+"geosite:AVITO",
+"geosite:AVIASALES",
+"geosite:OZON",
+"geosite:VK",
+"geosite:WILDBERRIES"
+],
+outboundTag:"direct"
+},
+{
+ip:["geoip:RU"],
+outboundTag:"direct"
+}
+)
+
+
+let result = JSON.stringify(config,null,4)
+
+document.getElementById("output").value = result
+
+navigator.clipboard.writeText(result)
+
+document.getElementById("status").innerText =
+"✅ Конфигурация готова и скопирована в буфер обмена"
+
+}
+catch(e){
+
+document.getElementById("status").innerText =
+"❌ Ошибка JSON: " + e.message
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
